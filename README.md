@@ -2,5 +2,5 @@
 
 
 ```
-<div @tap="tapHandler" v-hm="{hammerConfig}"></div>
+<div v-hm:tap="onTap" hm-options=""></div>
 ```
