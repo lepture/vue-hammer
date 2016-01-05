@@ -43,12 +43,19 @@ VueHammer.install = function(Vue) {
       var mc = this.mc
       var vm = this.vm
       var event = this.arg
+      var modifiers = this.modifiers
 
       if (this.handler) {
         mc.off(event, this.handler)
       }
 
       this.handler = function(e) {
+        if (modifiers.stop) {
+          e.stopPropagation()
+        }
+        if (modifiers.prevent) {
+          e.preventDefault()
+        }
         vm.$event = e
         e.targetVM = vm
         handler.call(vm, e)
