@@ -26,7 +26,9 @@ VueHammer.install = function(Vue) {
       var recognizer
 
       if (custom) {
-        // TODO: custom events
+        recognizer = new Hammer[capitalize(custom.type)](custom)
+        recognizer.recognizeWith(mc.recognizers)
+        mc.add(recognizer)
       } else if (!~VueHammer.gestures.indexOf(event)) {
         console.warn('Invalid v-hm event: ' + event)
       } else {
@@ -34,6 +36,7 @@ VueHammer.install = function(Vue) {
         if (!recognizer) {
           // TODO: options
           recognizer = new Hammer[capitalize(event)]()
+          recognizer.recognizeWith(mc.recognizers)
           mc.add(recognizer)
         }
       }
