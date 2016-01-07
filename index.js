@@ -11,13 +11,17 @@ var VueHammer = {
 VueHammer.install = function(Vue) {
 
   Vue.directive('hm', {
-    params: ['hmOptions', 'hmDirection'],
+    params: ['hm-options', 'hm-event-options'],
     acceptStatement: true,
 
     bind: function() {
+      var options
       if (!this.el.hammer) {
-        // TODO: deal with hmOptions
-        var options = this.params.hmOptions || VueHammer.defauts
+        if (this.params.hmOptions) {
+          options = parseParam(this.params.hmOptions)
+        } else {
+          options = VueHammer.defauts
+        }
         this.el.hammer = new Hammer.Manager(this.el, options)
       }
       var mc = this.mc = this.el.hammer
@@ -34,8 +38,12 @@ VueHammer.install = function(Vue) {
       } else {
         recognizer = mc.get(event)
         if (!recognizer) {
-          // TODO: options
-          recognizer = new Hammer[capitalize(event)]()
+          options = {}
+          if (this.params.hmEventOptions) {
+            options = parseParam(this.params.hmEventOptions)[event] || {}
+            options = hammerOptions(options)
+          }
+          recognizer = new Hammer[capitalize(event)](options)
           recognizer.recognizeWith(mc.recognizers)
           mc.add(recognizer)
         }
@@ -77,6 +85,11 @@ VueHammer.install = function(Vue) {
       }
     }
   })
+
+  function parseParam(s) {
+    s = Vue.parsers.expression.parseExpression(s)
+    return s.get()
+  }
 }
 
 VueHammer.registerCustomEvent = function(event, options) {
@@ -86,6 +99,18 @@ VueHammer.registerCustomEvent = function(event, options) {
 
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+function hammerOptions(options) {
+  var rv = {}
+  Object.keys(options).forEach(function(k) {
+    var value = options[k]
+    if (/^[A-Z_]+$/.test(value)) {
+      value = Hammer[value]
+    }
+    rv[k] = value
+  })
+  return rv
 }
 
 module.exports = VueHammer
